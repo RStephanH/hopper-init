@@ -17,3 +17,30 @@ if [[ $ID == "arch" ]]; then
 else 
   echo ">> Detected distro: $ID"
 fi
+
+install_pkg(){
+
+  case "$distro" in
+    arch|manjaro|endeavouros|cachyos)
+      sudo pacman --needed --noconfirm "$@"
+      ;;
+    debian|ubuntu|kali)
+      sudo apt update 
+      sudo apt install -y "$@"
+      ;;
+    fedora)
+      sudo dnf install -y "$@"
+      ;;
+    opensuse*)
+      sudo zypper install -y "$@"
+      ;;
+    *)
+      echo "❌Unsupported distro : $distro"
+  esac
+
+}
+
+basic_tools=("curl" "wget" "git" "unzip")
+for tool in basic_tools; do
+  command ...
+done
