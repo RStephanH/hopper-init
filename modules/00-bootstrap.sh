@@ -40,7 +40,21 @@ install_pkg(){
 
 }
 
-basic_tools=("curl" "wget" "git" "unzip")
-for tool in basic_tools; do
-  command ...
-done
+ensure_installed(){
+  local_tool=("$@")
+  for tool in "${local_tool[@]}"; do
+    if ! command -v "$tool" &>/dev/null; then
+      missing_tools+=("$tool")
+    else
+      echo "✅ $tool already installed !"
+    fi
+  done
+  echo "The missing tools are :"
+  for miss  in "${missing_tools[@]}"; do
+    echo "$miss"
+  done
+
+}
+
+basic_tools=("curl" "wget" "git" "unzip" "zellij")
+ensure_installed "${basic_tools[@]}"
