@@ -22,7 +22,7 @@ install_pkg(){
 
   case "$distro" in
     arch|manjaro|endeavouros|cachyos)
-      sudo pacman --needed --noconfirm "$@"
+      sudo pacman -S --needed --noconfirm "$@"
       ;;
     debian|ubuntu|kali)
       sudo apt update 
@@ -49,12 +49,25 @@ ensure_installed(){
       echo "✅ $tool already installed !"
     fi
   done
+
   echo "The missing tools are :"
+
   for miss  in "${missing_tools[@]}"; do
     echo "$miss"
   done
 
+  if [[ "${#missing_tools[@]}" -gt 0 ]]; then
+    echo ">>> Installing missing packages..."
+    install_pkg "${missing_tools[@]}"
+  else 
+    echo ">>> All the requested tools are already installed"
+  fi
+
 }
 
-basic_tools=("curl" "wget" "git" "unzip" "zellij")
+basic_tools=("curl" "wget" "git" "unzip")
 ensure_installed "${basic_tools[@]}"
+
+# == Export functions for other modules ===
+export -f install_pkg
+export -f ensure_installed
