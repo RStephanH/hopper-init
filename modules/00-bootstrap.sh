@@ -57,7 +57,7 @@ ensure_installed(){
   done
 
   if [[ "${#missing_tools[@]}" -gt 0 ]]; then
-    echo ">>> Installing missing packages..."
+    echo ">>> Installing missing packages : ${missing_tools[*]}"
     install_pkg "${missing_tools[@]}"
   else 
     echo ">>> All the requested tools are already installed"
