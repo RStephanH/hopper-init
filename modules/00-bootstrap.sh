@@ -2,21 +2,38 @@
 set -euo pipefail 
 
 # == Detect Linux Distro ==
-distro=""
-if [[ -f /etc/os-release ]]; then
-  # source (import) the file so we get variable like ID, NAME, VERSION_ID
-  . /etc/os-release
-  distro=$ID
-else
-  echo "❌Could not detect distro (no /etc/os-release)"
-  exit 1
-fi
+distro_detect(){
 
-if [[ $ID == "arch" ]]; then
-  echo "Damn it😯! You use Arch BTW!"
-else 
-  echo ">> Detected distro: $ID"
-fi
+  local distro=""
+  if [[ -f /etc/os-release ]]; then
+    #Load vars in a subshell to avoid global pollution 
+    local -A os_vars
+    while IFS='=' read -r key value; do
+      #skip comments and empty lines 
+      [[ $key == \#* || -z $key ]] && continue 
+      #Unquote value if needed (basic handling) 
+      value="${value//\"/}"
+      value="${value//\'/}"
+      os_vars[$key]=$value
+    done < /etc/os-release
+
+    distro="${os_vars[ID]:-}"
+  fi
+
+  if [[ -z $distro ]]; then
+    echo "❌ Could not detect distro (no /etc/os-release or missing ID)" >&2
+    return 1
+  fi
+
+  if [[ $distro == "arch" ]]; then
+    echo "Damn it😯! You use Arch BTW!"
+  else
+    echo ">> Detected distro: $distro"
+  fi
+
+  echo "$distro"  # Output the distro for caller to capture
+  return 0
+}
 
 install_pkg(){
 
@@ -65,9 +82,8 @@ ensure_installed(){
 
 }
 
-basic_tools=("curl" "wget" "git" "unzip")
-ensure_installed "${basic_tools[@]}"
+# == test section ==-
 
-# == Export functions for other modules ===
-export -f install_pkg
-export -f ensure_installed
+DISTRO=$(distro_detect)
+echo "$DISTRO"
+# distro_detect
